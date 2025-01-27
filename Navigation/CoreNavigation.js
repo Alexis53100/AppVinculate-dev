@@ -8,6 +8,7 @@ import InstitucionesSeleccion from "../Screens/InstitucionesSeleccion";
 import InstitucionesDescripcion from "../Screens/InstitucionesDescripcion";
 import Patrocinadores from "../Screens/Patrocinadores";
 import SaludMental from "../Screens/SaludMental";
+import MisMatches from "../Screens/MisMatches.js";
 import Settings from "../Screens/Settings";
 import SkillsUpdate from "../Screens/SkillsUpdate";
 import { vinculateApi } from '../src/api/vinculateAPI';
@@ -26,6 +27,7 @@ export const CoreNavigation = ({navigation, route}) => {
       <Drawer.Screen name="TalentosSeleccion" options={{headerTitle: ''}}>
         {props => <TalentosSeleccion {...props} extraData={route.params} navigation={navigation} />}
       </Drawer.Screen>
+      <Drawer.Screen name="MisMatches" component={MisMatches} />
       <Drawer.Screen name="TalentosDescripcion" component={TalentosDescripcion} />
       <Drawer.Screen name="InstitucionesSeleccion" component={InstitucionesSeleccion} />
       <Drawer.Screen name="InstitucionesDescripcion" component={InstitucionesDescripcion} />
@@ -134,6 +136,18 @@ const MenuList = ({navigation, extraData }) => {
           <Icon name="people-outline" size={25} />
           <Text style={styles.menuTexto}> Editar Skills</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity 
+  style={{...styles.menuBoton, flexDirection:'row' }}
+  onPress={() => {
+    navigation.navigate('MisMatches', {
+      idEmpresa: idEmpresa,
+    });
+  }}
+>
+  <Icon name="list-outline" size={25} />
+  <Text style={styles.menuTexto}> Ver mis Matches</Text>
+</TouchableOpacity>
 
         {/* Botón Quejas y Sugerencias */}
         <TouchableOpacity
