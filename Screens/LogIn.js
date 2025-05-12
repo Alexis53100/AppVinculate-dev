@@ -135,6 +135,12 @@ const LogIn = ({ navigation }) => {
                         resizeMode="contain" 
                     />
                 </View>
+                <TouchableOpacity
+  onPress={() => navigation.navigate('RecuperarContrasenia')}
+>
+  <Text style={styles.cuerpoLinks}>Recuperar contraseña</Text>
+</TouchableOpacity>
+
             </ImageBackground>
 
         </SafeAreaView>

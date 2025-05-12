@@ -46,7 +46,7 @@ const InstitucionesSeleccion = ({ navigation, route }) => {
                     usuario: usuario,
                     idUsuario: idUsuario,
                     idEmpresa: idEmpresa,
-                    talento: talento,
+                    talento: {...talento, idInstitucionTalento: item.idInstitucionTalento}, // Add idInstitucionTalento
                     ies: item,
                     empresaData: empresaData,
                 });

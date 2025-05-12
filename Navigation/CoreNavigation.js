@@ -2,12 +2,18 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Modal, StyleSheet, ActivityIndicator } from 'react-native';
 import { DrawerContentScrollView, createDrawerNavigator } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/Ionicons';
+
+// Importa la nueva pantalla
+import BolsaTrabajo from "../Screens/BolsaTrabajo";
+
+// Importa tus otras pantallas
 import TalentosSeleccion from "../Screens/TalentosSeleccion";
 import TalentosDescripcion from "../Screens/TalentosDescripcion";
 import InstitucionesSeleccion from "../Screens/InstitucionesSeleccion";
 import InstitucionesDescripcion from "../Screens/InstitucionesDescripcion";
 import Patrocinadores from "../Screens/Patrocinadores";
 import SaludMental from "../Screens/SaludMental";
+import MisMatches from "../Screens/MisMatches.js";
 import Settings from "../Screens/Settings";
 import SkillsUpdate from "../Screens/SkillsUpdate";
 import { vinculateApi } from '../src/api/vinculateAPI';
@@ -18,14 +24,17 @@ const Drawer = createDrawerNavigator();
 
 export const CoreNavigation = ({navigation, route}) => {
   return (
-    <Drawer.Navigator initialRouteName="TalentosSeleccion"
-      drawerContent={(props)=> <MenuList {...props} extraData={route.params} navigation={navigation} /> }
+    <Drawer.Navigator
+      initialRouteName="TalentosSeleccion"
+      drawerContent={(props)=> <MenuList {...props} extraData={route.params} navigation={navigation} />}
       screenOptions={{
         headerTitle: ''
-    }}>
+      }}
+    >
       <Drawer.Screen name="TalentosSeleccion" options={{headerTitle: ''}}>
         {props => <TalentosSeleccion {...props} extraData={route.params} navigation={navigation} />}
       </Drawer.Screen>
+      <Drawer.Screen name="MisMatches" component={MisMatches} />
       <Drawer.Screen name="TalentosDescripcion" component={TalentosDescripcion} />
       <Drawer.Screen name="InstitucionesSeleccion" component={InstitucionesSeleccion} />
       <Drawer.Screen name="InstitucionesDescripcion" component={InstitucionesDescripcion} />
@@ -33,18 +42,21 @@ export const CoreNavigation = ({navigation, route}) => {
       <Drawer.Screen name="SaludMental" component={SaludMental} />
       <Drawer.Screen name="SkillsUpdate" component={SkillsUpdate} />
       <Drawer.Screen name="Settings" component={Settings} />
+
+      {/* Aquí agregamos la nueva ruta para Bolsa de Trabajo */}
+      <Drawer.Screen name="BolsaTrabajo" component={BolsaTrabajo} />
     </Drawer.Navigator>
   );
 }
 
 const MenuList = ({navigation, extraData }) => {
   const { usuario, idUsuario, idEmpresa, empresaData } = extraData;
-  const {responsable} = empresaData;
+  const { responsable } = empresaData;
 
-  // Estado para controlar el modal y el indicador de carga
+  // Estados para el modal de Quejas y Sugerencias
   const [modalVisible, setModalVisible] = useState(false);
   const [mensaje, setMensaje] = useState('');
-  const [loading, setLoading] = useState(false);  // Estado para controlar el spinner
+  const [loading, setLoading] = useState(false);  // Estado para el spinner
 
   const enviarQueja = () => {
     if (mensaje.trim() === '') {
@@ -78,9 +90,11 @@ const MenuList = ({navigation, extraData }) => {
   };
 
   return (
-    <View style={styles.menuContainer} >
+    <View style={styles.menuContainer}>
       <DrawerContentScrollView>
-        <Text style={[styles.tituloTexto, styleColors.tituloTexto]}>Bienvenido { responsable.split(' ')[0] }</Text>
+        <Text style={[styles.tituloTexto, styleColors.tituloTexto]}>
+          Bienvenido { responsable.split(' ')[0] }
+        </Text>
 
         <TouchableOpacity 
           style={{...styles.menuBoton, flexDirection:'row' }}
@@ -112,6 +126,22 @@ const MenuList = ({navigation, extraData }) => {
           <Text style={styles.menuTexto}> Salud Mental</Text>
         </TouchableOpacity>
 
+        {/* Aquí agregamos la nueva opción del menú: Bolsa de Trabajo */}
+        <TouchableOpacity
+          style={{...styles.menuBoton, flexDirection:'row' }}
+          onPress={() => {
+            navigation.navigate('BolsaTrabajo', {
+              usuario: usuario,
+              idUsuario: idUsuario,
+              idEmpresa: idEmpresa,
+              empresaData: empresaData,
+            });
+          }}
+        >
+          <Icon name="briefcase-outline" size={25} />
+          <Text style={styles.menuTexto}> Bolsa de Trabajo</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity 
           style={{...styles.menuBoton, flexDirection:'row' }}
           onPress={() => navigation.navigate('Patrocinadores')}
@@ -135,6 +165,18 @@ const MenuList = ({navigation, extraData }) => {
           <Text style={styles.menuTexto}> Editar Skills</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity 
+          style={{...styles.menuBoton, flexDirection:'row' }}
+          onPress={() => {
+            navigation.navigate('MisMatches', {
+              idEmpresa: idEmpresa,
+            });
+          }}
+        >
+          <Icon name="list-outline" size={25} />
+          <Text style={styles.menuTexto}> Ver mis Matches</Text>
+        </TouchableOpacity>
+
         {/* Botón Quejas y Sugerencias */}
         <TouchableOpacity
           style={{...styles.menuBoton, flexDirection:'row' }}
@@ -149,13 +191,12 @@ const MenuList = ({navigation, extraData }) => {
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}  // Permite cerrar el modal
+          onRequestClose={() => setModalVisible(false)}
         >
           <View style={modalStyles.centeredView}>
             <View style={modalStyles.modalView}>
               <Text style={styles.tituloTexto}>Escriba su queja o sugerencia</Text>
 
-              {/* Indicador de progreso */}
               {loading && <ActivityIndicator size="large" color="#000000" />}
 
               <TextInput
@@ -166,21 +207,21 @@ const MenuList = ({navigation, extraData }) => {
                 maxLength={1000}
                 onChangeText={text => setMensaje(text)}
                 value={mensaje}
-                editable={!loading}  // Desactivar el campo mientras carga
+                editable={!loading}
               />
 
               <View style={modalStyles.buttonContainer}>
                 <TouchableOpacity 
                   style={styles.botonCuerpo}
                   onPress={enviarQueja}
-                  disabled={loading}  // Desactivar el botón mientras carga
+                  disabled={loading}
                 >
                   <Text style={styles.botonTexto}>Enviar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
                   style={styles.botonCuerpo}
-                  onPress={() => setModalVisible(false)}  // Cerrar el modal
+                  onPress={() => setModalVisible(false)}
                 >
                   <Text style={styles.botonTexto}>Cancelar</Text>
                 </TouchableOpacity>
@@ -196,7 +237,7 @@ const MenuList = ({navigation, extraData }) => {
             idUsuario: idUsuario,
             idEmpresa: idEmpresa,
             empresaData: empresaData,
-        })}
+          })}
         >
           <Icon name="remove-circle-outline" size={25} color='red'/>
           <Text style={{...styles.menuTexto, color: 'red'}}> Eliminar cuenta</Text>
@@ -223,7 +264,7 @@ const modalStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',  // Fondo semitransparente
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     width: '80%',
@@ -250,7 +291,7 @@ const modalStyles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
-    textAlignVertical: 'top',  // Para que el texto comience desde arriba
+    textAlignVertical: 'top',
   },
   buttonContainer: {
     flexDirection: 'row',

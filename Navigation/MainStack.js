@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import CuentaNueva from "../Screens/CuentaNueva";
 import CuentaRegistro from "../Screens/CuentaRegistro";
 import AvisoPrivacidad from "../Screens/AvisoPrivacidad";
-
+import RecuperarContrasenia from "../Screens/RecuperarContrasenia";
 import EmpresaValidada1 from "../Screens/EmpresaValidada1";
 import EmpresaValidada2 from "../Screens/EmpresaValidada2";
 import SkillsRegistro from "../Screens/SkillsRegistro";
@@ -32,6 +32,7 @@ const MainStack = () => {
                 <Stack.Screen name='MensajeBienvenida' component={ MensajeBienvenida } />
                 <Stack.Screen name='EmpresaValidada1' component={ EmpresaValidada1 } />
                 <Stack.Screen name='EmpresaValidada2' component={ EmpresaValidada2 } />
+                <Stack.Screen name="RecuperarContrasenia" component={RecuperarContrasenia} />
                 <Stack.Screen name='SkillsRegistro' component={ SkillsRegistro } />
                 <Stack.Screen name='CoreNavigation' component={ CoreNavigation } />
 
