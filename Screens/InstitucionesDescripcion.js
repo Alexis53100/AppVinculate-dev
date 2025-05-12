@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { styles } from '../src/styles/app-theme';  
-import { stylesBase } from "../src/styles/base-colors";
+import { stylesBase } from '../src/styles/base-colors';
 import { vinculateApi } from '../src/api/vinculateAPI';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -36,99 +36,46 @@ const getStatusDescription = (idEstatus) => {
 };
 
 const InstitucionesDescripcion = ({ navigation, route }) => {
-
   const [loading, setLoading] = useState(false);
   const { usuario, idUsuario, idEmpresa, talento, ies, empresaData } = route.params;
-  const [mostrarBotonVincular, setMostrarBotonVincular] = useState(true);
-  const [idEstatus, setIdEstatus] = useState(null);
-  const [idEmpresaTalento, setIdEmpresaTalento ] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false); 
-  const [postuladoData, setPostuladoData] = useState([]); 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [postuladoData, setPostuladoData] = useState([]);
   const [acceptModalVisible, setAcceptModalVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [postuladoAceptado, setPostuladoAceptado] = useState(false);
-
-  // Estado para contar cuántos matches hay "En Solicitud" (idEstatus = 4) 
-  // en esta misma institución.
   const [enSolicitudCount, setEnSolicitudCount] = useState(0);
+  const [idEstatus, setIdEstatus] = useState(null);
+  const [idEmpresaTalento, setIdEmpresaTalento] = useState(null);
 
   useFocusEffect(
     React.useCallback(() => {
       consultarMatch();
-    }, [ usuario, idUsuario, idEmpresa, talento, ies, empresaData])
+    }, [usuario, idUsuario, idEmpresa, talento, ies, empresaData])
   );
 
-  const llamarTelefono = async () => {
-    await Linking.openURL('tel:' + ies.telefono);
-  };
-  const llamarTelefono = async () => {
-    await Linking.openURL('tel:' + ies.telefono);
+  const llamarTelefono = () => Linking.openURL('tel:' + ies.telefono);
+
+  const enviarWhatsApp = () => {
+    const url = Platform.OS === 'ios'
+      ? `whatsapp://send?phone=52${ies.telefono}&text=Hola esta empresa desea vincularse con tu Instituo`  
+      : `https://wa.me/52${ies.telefono}?text=Hola esta empresa desea vincularse con tu Instituo`;
+    return Linking.openURL(url);
   };
 
-  const enviarWhatsApp = async () => {
-    if(Platform.OS === 'ios') {
-      await Linking.openURL('whatsapp://send?phone=52' + ies.telefono + '&text=Hola esta empresa desea vicularse con tu Instituo de Educación Superior.');
-    } else {
-      await Linking.openURL('https://wa.me/52' + ies.telefono + '&text=Hola esta empresa desea vicularse con tu Instituo de Educación Superior.');
-    }
-  };
-  const enviarWhatsApp = async () => {
-    if(Platform.OS === 'ios') {
-      await Linking.openURL('whatsapp://send?phone=52' + ies.telefono + '&text=Hola esta empresa desea vicularse con tu Instituo de Educación Superior.');
-    } else {
-      await Linking.openURL('https://wa.me/52' + ies.telefono + '&text=Hola esta empresa desea vicularse con tu Instituo de Educación Superior.');
-    }
+  const enviarCorreo = () => {
+    const url = Platform.OS === 'ios'
+      ? `mailto:${ies.correo}?subject=Vinculación con empresa`  
+      : `mailto:${ies.correo}?subject=Vinculación con empresa`;
+    return Linking.openURL(url);
   };
 
-  const enviarCorreo = async () => {
-    if(Platform.OS === 'ios') {
-      await Linking.openURL('mailto:' + ies.correo + '&subject=Vinculación con empresa');
-    } else {
-      await Linking.openURL('mailto:' + ies.correo + '?subject=Vinculación con empresa');
-  const enviarCorreo = async () => {
-    if(Platform.OS === 'ios') {
-      await Linking.openURL('mailto:' + ies.correo + '&subject=Vinculación con empresa');
-    } else {
-      await Linking.openURL('mailto:' + ies.correo + '?subject=Vinculación con empresa');
-    }
-  };
-  };
-
-  const visitarSitio = async () => {
-    await Linking.openURL('https:' + ies.paginaWeb);
-  };
-  const visitarSitio = async () => {
-    await Linking.openURL('https:' + ies.paginaWeb);
-  };
+  const visitarSitio = () => Linking.openURL(ies.paginaWeb.startsWith('http') ? ies.paginaWeb : `https://${ies.paginaWeb}`);
 
   const vincularAhora = () => {
     if (!idEmpresa || !talento?.idInstitucionTalento) {
-      Alert.alert('Advertencia', 'Faltan datos para la vinculación.');
-      return;
+      return Alert.alert('Advertencia', 'Faltan datos para la vinculación.');
     }
-  const vincularAhora = () => {
-    if (!idEmpresa || !talento?.idInstitucionTalento) {
-      Alert.alert('Advertencia', 'Faltan datos para la vinculación.');
-      return;
-    }
-
-    console.log('CONSUMIENDO WS /setMatch:');
-    console.log('Payload:', {
-      empresa: idEmpresa,
-      idInstitucionTalento: talento.idInstitucionTalento
-    });
-    console.log('CONSUMIENDO WS /setMatch:');
-    console.log('Payload:', {
-      empresa: idEmpresa,
-      idInstitucionTalento: talento.idInstitucionTalento
-    });
-
     setLoading(true);
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append('empresa', idEmpresa);
-    formData.append('idInstitucionTalento', talento.idInstitucionTalento);
     const formData = new FormData();
     formData.append('empresa', idEmpresa);
     formData.append('idInstitucionTalento', talento.idInstitucionTalento);
@@ -139,663 +86,201 @@ const InstitucionesDescripcion = ({ navigation, route }) => {
         'X-API-KEY': 'V23IIUV1'
       }
     })
-    .then(response => {
-      console.log('API Response:', response.data);
-      setLoading(false);
-      if (response.data.codigo === "1" || response.data.codigo === 1) {
-        Alert.alert('Éxito', response.data.texto);
-        // Dejamos visible el botón para que permita múltiples matches
-        // y actualizamos la cuenta de "En Solicitud"
-        consultarMatch();
-      } else {
-        Alert.alert('Error', response.data.texto || 'No se pudo realizar el Match');
-      }
-    })
-    .catch(error => {
-      console.error('API Error:', error.response?.data || error);
-      setLoading(false);
-      Alert.alert('Error', 'No se pudo realizar el Match');
-    });
-  };
-    vinculateApi.post('/setMach', formData, {
-      headers: { 
-        'Content-Type': 'multipart/form-data',
-        'X-API-KEY': 'V23IIUV1'
-      }
-    })
-    .then(response => {
-      console.log('API Response:', response.data);
-      setLoading(false);
-      if (response.data.codigo === "1" || response.data.codigo === 1) {
-        Alert.alert('Éxito', response.data.texto);
-        // Dejamos visible el botón para que permita múltiples matches
-        // y actualizamos la cuenta de "En Solicitud"
-        consultarMatch();
-      } else {
-        Alert.alert('Error', response.data.texto || 'No se pudo realizar el Match');
-      }
-    })
-    .catch(error => {
-      console.error('API Error:', error.response?.data || error);
-      setLoading(false);
-      Alert.alert('Error', 'No se pudo realizar el Match');
-    });
+      .then(({ data }) => {
+        setLoading(false);
+        if (data.codigo === 1 || data.codigo === '1') {
+          Alert.alert('Éxito', data.texto);
+          consultarMatch();
+        } else {
+          Alert.alert('Error', data.texto || 'No se pudo realizar el Match');
+        }
+      })
+      .catch(err => {
+        console.error('API Error:', err);
+        setLoading(false);
+        Alert.alert('Error', 'No se pudo realizar el Match');
+      });
   };
 
   const detalleVinculacion = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await vinculateApi.post(
-        'https://vinculate.itesa.edu.mx/seph/getMatchEmpresa',
-        { idEmpresa: parseInt(idEmpresa) },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-  const detalleVinculacion = async () => {
-    try {
-      setLoading(true);
-      const response = await vinculateApi.post(
-        'https://vinculate.itesa.edu.mx/seph/getMatchEmpresa',
-        { idEmpresa: parseInt(idEmpresa) },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      console.log('API response:', response.data);
-      if (response.data.matchEmpresa && response.data.matchEmpresa.length > 0) {
-        // Filtramos solo los matches de la misma institución
-        const filteredMatches = response.data.matchEmpresa.filter(
-          match => match.nombre === ies.nombre
-        );
-        
-        if (filteredMatches.length > 0) {
-          setPostuladoData(filteredMatches);
+      const { data } = await vinculateApi.post('/getMatchEmpresa', { idEmpresa: parseInt(idEmpresa) });
+      setLoading(false);
+      if (data.matchEmpresa?.length) {
+        const filtered = data.matchEmpresa.filter(m => m.nombre === ies.nombre);
+        if (filtered.length) {
+          setPostuladoData(filtered);
           setModalVisible(true);
-        } else {
-          Alert.alert('Info', 'No hay matches disponibles para esta institución');
-        }
+        } else Alert.alert('Info', 'No hay matches disponibles para esta institución');
       } else {
         Alert.alert('Info', 'No hay matches disponibles');
       }
-    } catch (error) {
-      console.error('API Error:', error.response?.data || error.message);
-      Alert.alert('Error', 'No se pudieron obtener los matches');
-    } finally {
+    } catch (e) {
+      console.error('API Error:', e);
       setLoading(false);
-    }
-  };
-      );
-      
-      console.log('API response:', response.data);
-      if (response.data.matchEmpresa && response.data.matchEmpresa.length > 0) {
-        // Filtramos solo los matches de la misma institución
-        const filteredMatches = response.data.matchEmpresa.filter(
-          match => match.nombre === ies.nombre
-        );
-        
-        if (filteredMatches.length > 0) {
-          setPostuladoData(filteredMatches);
-          setModalVisible(true);
-        } else {
-          Alert.alert('Info', 'No hay matches disponibles para esta institución');
-        }
-      } else {
-        Alert.alert('Info', 'No hay matches disponibles');
-      }
-    } catch (error) {
-      console.error('API Error:', error.response?.data || error.message);
       Alert.alert('Error', 'No se pudieron obtener los matches');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const aceptarPostulado = () => {
-    console.log(postuladoData.idPostulado);
-    setModalVisible(false);
+  const aceptarPostulado = (post) => {
     setPostuladoAceptado(true);
-    
-    if (!postuladoData.idPostulado) {
-      Alert.alert('Advertencia', 'Faltan datos para aceptar postulado.');
-      return;
-    }
-  const aceptarPostulado = () => {
-    console.log(postuladoData.idPostulado);
+    setPostuladoData(post);
     setModalVisible(false);
-    setPostuladoAceptado(true);
-    
-    if (!postuladoData.idPostulado) {
-      Alert.alert('Advertencia', 'Faltan datos para aceptar postulado.');
-      return;
-    }
-
-    // Mostrar el modal con el cuadro de texto
-    setAcceptModalVisible(true);
-  };
-    // Mostrar el modal con el cuadro de texto
     setAcceptModalVisible(true);
   };
 
-  const rechazarPostulado = () => {
-    console.log(postuladoData.idPostulado);
-    setModalVisible(false);
+  const rechazarPostulado = (post) => {
     setPostuladoAceptado(false);
-    
-    if (!postuladoData.idPostulado) {
-      Alert.alert('Advertencia', 'Faltan datos para rechazar postulado.');
-      return;
-    }
-  const rechazarPostulado = () => {
-    console.log(postuladoData.idPostulado);
+    setPostuladoData(post);
     setModalVisible(false);
-    setPostuladoAceptado(false);
-    
-    if (!postuladoData.idPostulado) {
-      Alert.alert('Advertencia', 'Faltan datos para rechazar postulado.');
-      return;
-    }
-
-    // Mostrar el modal con el cuadro de texto
-    setAcceptModalVisible(true);
-  };
-    // Mostrar el modal con el cuadro de texto
     setAcceptModalVisible(true);
   };
 
   const handleAccept = () => {
-    console.log('Valor del cuadro de texto:', inputValue);
-  const handleAccept = () => {
-    console.log('Valor del cuadro de texto:', inputValue);
-
     const aceptado = postuladoAceptado ? 2 : 0;
-    console.log('Valor de aceptado:', aceptado);
-    console.log('comentario:', inputValue);
-    console.log('idPostulado:', postuladoData.idPostulado);
-    const aceptado = postuladoAceptado ? 2 : 0;
-    console.log('Valor de aceptado:', aceptado);
-    console.log('comentario:', inputValue);
-    console.log('idPostulado:', postuladoData.idPostulado);
-
-    setLoading(true);
-    setLoading(true);
-
     const formData = new FormData();
     formData.append('comentario', inputValue);
     formData.append('idPostulado', postuladoData.idPostulado);
     formData.append('aceptado', aceptado);
-    const formData = new FormData();
-    formData.append('comentario', inputValue);
-    formData.append('idPostulado', postuladoData.idPostulado);
-    formData.append('aceptado', aceptado);
+    setLoading(true);
 
-    vinculateApi.post('/setRetroPostuladoEmpresa', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    .then(response => {
-      setLoading(false);
-      console.log('Respuesta:', response.data);
-    vinculateApi.post('/setRetroPostuladoEmpresa', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    .then(response => {
-      setLoading(false);
-      console.log('Respuesta:', response.data);
-
-      if (response.data.codigo === "1" || response.data.codigo === 1) {
-        Alert.alert('Éxito', response.data.texto);
-      } else {
-        Alert.alert('Error', 'No se pudo enviar la retroalimentación');
-      }
-    })
-    .catch(error => {
-      setLoading(false);
-      Alert.alert('Error', 'Hubo un problema al realizar el match');
-    });
-      if (response.data.codigo === "1" || response.data.codigo === 1) {
-        Alert.alert('Éxito', response.data.texto);
-      } else {
-        Alert.alert('Error', 'No se pudo enviar la retroalimentación');
-      }
-    })
-    .catch(error => {
-      setLoading(false);
-      Alert.alert('Error', 'Hubo un problema al realizar el match');
-    });
+    vinculateApi.post('/setRetroPostuladoEmpresa', formData)
+      .then(({ data }) => {
+        setLoading(false);
+        if (data.codigo === 1 || data.codigo === '1') {
+          Alert.alert('Éxito', data.texto);
+        } else {
+          Alert.alert('Error', 'No se pudo enviar la retroalimentación');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+        Alert.alert('Error', 'Hubo un problema al enviar la retroalimentación');
+      });
 
     setAcceptModalVisible(false);
-  };
-    setAcceptModalVisible(false);
+    setInputValue('');
   };
 
-  const handleCancel = () => {
-    // Cerrar el modal sin hacer nada
-    setAcceptModalVisible(false);
-  };
-  const handleCancel = () => {
-    // Cerrar el modal sin hacer nada
-    setAcceptModalVisible(false);
-  };
+  const handleCancel = () => setAcceptModalVisible(false);
 
   const consultarMatch = () => {
-    if (!idEmpresa) {
-      Alert.alert('Advertencia', 'Faltan datos para la vinculación.');
-      return;
-    }
-  
+    if (!idEmpresa) return;
     setLoading(true);
-  
+
     const formData = new FormData();
     formData.append('idEmpresa', idEmpresa);
-  
-    vinculateApi.post('/getMatchEmpresa', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    .then(response => {
-      setLoading(false);
-      if (response.data.codigo === "1" || response.data.codigo === 1) {
-        const matchEmpresa = response.data.matchEmpresa || [];
 
-        // Filtrar los matches de esta misma institución
-        const coincidencias = matchEmpresa.filter(
-          match => 
-            match.nombreTalento === talento.nombreTalento && 
-            match.nombre === ies.nombre
-        );
-  const consultarMatch = () => {
-    if (!idEmpresa) {
-      Alert.alert('Advertencia', 'Faltan datos para la vinculación.');
-      return;
-    }
-  
-    setLoading(true);
-  
-    const formData = new FormData();
-    formData.append('idEmpresa', idEmpresa);
-  
-    vinculateApi.post('/getMatchEmpresa', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    .then(response => {
-      setLoading(false);
-      if (response.data.codigo === "1" || response.data.codigo === 1) {
-        const matchEmpresa = response.data.matchEmpresa || [];
-
-        // Filtrar los matches de esta misma institución
-        const coincidencias = matchEmpresa.filter(
-          match => 
-            match.nombreTalento === talento.nombreTalento && 
-            match.nombre === ies.nombre
-        );
-
-        if (coincidencias.length > 0) {
-          const ultimaCoincidencia = coincidencias[coincidencias.length - 1];
-          const { idEmpresaTalento, idEstatus } = ultimaCoincidencia;
-          setIdEstatus(idEstatus);
-          setIdEmpresaTalento(idEmpresaTalento);
-        } else {
-          setIdEstatus(null);
+    vinculateApi.post('/getMatchEmpresa', formData)
+      .then(({ data }) => {
+        setLoading(false);
+        if (data.codigo === 1 || data.codigo === '1') {
+          const matches = data.matchEmpresa || [];
+          // estado y conteos
+          const same = matches.filter(m => m.nombreTalento === talento.nombreTalento && m.nombre === ies.nombre);
+          if (same.length) {
+            const last = same[same.length - 1];
+            setIdEmpresaTalento(last.idEmpresaTalento);
+            setIdEstatus(last.idEstatus);
+          } else {
+            setIdEstatus(null);
+          }
+          const enSol = matches.filter(m => m.nombre === ies.nombre && m.idEstatus === '4');
+          setEnSolicitudCount(enSol.length);
         }
-
-        // Contar cuántos están "En Solicitud" (idEstatus = '4') 
-        // para esta misma institución:
-        const enSolicitud = matchEmpresa.filter(
-          (m) => m.nombre === ies.nombre && m.idEstatus === '4'
-        );
-        setEnSolicitudCount(enSolicitud.length);
-
-      }
-    })
-    .catch(error => {
-      setLoading(false);
-      Alert.alert('Error', 'Hubo un problema al consultar los matches');
-    });
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   };
-        if (coincidencias.length > 0) {
-          const ultimaCoincidencia = coincidencias[coincidencias.length - 1];
-          const { idEmpresaTalento, idEstatus } = ultimaCoincidencia;
-          setIdEstatus(idEstatus);
-          setIdEmpresaTalento(idEmpresaTalento);
-        } else {
-          setIdEstatus(null);
-        }
 
-        // Contar cuántos están "En Solicitud" (idEstatus = '4') 
-        // para esta misma institución:
-        const enSolicitud = matchEmpresa.filter(
-          (m) => m.nombre === ies.nombre && m.idEstatus === '4'
-        );
-        setEnSolicitudCount(enSolicitud.length);
-
-      }
-    })
-    .catch(error => {
-      setLoading(false);
-      Alert.alert('Error', 'Hubo un problema al consultar los matches');
-    });
-  };
+  const renderMatchItem = ({ item }) => (
+    <View style={modalStyles.itemContainer}>
+      <Text style={modalStyles.text}>ID: {item.idEmpresaTalento}</Text>
+      <Text style={modalStyles.text}>{item.nombre}</Text>
+      <Text style={modalStyles.text}>Talento: {item.nombreTalento}</Text>
+      <Text style={modalStyles.text}>Estado: {getStatusDescription(item.idEstatus)}</Text>
+      {item.idEstatus === '4' && (
+        <View style={modalStyles.buttonContainer}>
+          <TouchableOpacity style={modalStyles.button} onPress={() => aceptarPostulado(item)}><Text style={modalStyles.textStyle}>Aceptar</Text></TouchableOpacity>
+          <TouchableOpacity style={modalStyles.button} onPress={() => rechazarPostulado(item)}><Text style={modalStyles.textStyle}>Rechazar</Text></TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
+      {/*HEADER*/}
       <View style={[styles.seccionEncabezado, stylesBase.seccionEncabezado]}>
         <Text style={[styles.tituloTexto, stylesBase.tituloTexto]}>{ies.siglas}</Text>
       </View>
-      
+
+      {/*LOADING*/}
       {loading ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
+        <View style={styles.centered}><ActivityIndicator size="large" color="#0000ff"/></View>
       ) : (
         <ScrollView>
           <View style={[styles.seccionCuerpo, styles.seccionCuerpoWBorder]}>
             <Text style={styles.subtituloTexto}>{ies.nombre}</Text>
-            
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={llamarTelefono}
-            >
-              <Image 
-                style={[styles.botonCuerpo, stylesBase.botonCuerpo, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                source={require('../Componentes/img/contact32.png')} 
-              />
-              <Text style={styles.botonTexto}>¡Llamar Ahora!</Text>
-            </TouchableOpacity>
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={[styles.seccionEncabezado, stylesBase.seccionEncabezado]}>
-        <Text style={[styles.tituloTexto, stylesBase.tituloTexto]}>{ies.siglas}</Text>
-      </View>
-      
-      {loading ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      ) : (
-        <ScrollView>
-          <View style={[styles.seccionCuerpo, styles.seccionCuerpoWBorder]}>
-            <Text style={styles.subtituloTexto}>{ies.nombre}</Text>
-            
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={llamarTelefono}
-            >
-              <Image 
-                style={[styles.botonCuerpo, stylesBase.botonCuerpo, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                source={require('../Componentes/img/contact32.png')} 
-              />
-              <Text style={styles.botonTexto}>¡Llamar Ahora!</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={enviarWhatsApp}
-            >
-              <Image 
-                style={[styles.botonCuerpo, stylesBase.botonCuerpo, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                source={require('../Componentes/img/SMS2-32.png')} 
-              />
-              <Text style={styles.botonTexto}>Enviar WhatsApp</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={enviarWhatsApp}
-            >
-              <Image 
-                style={[styles.botonCuerpo, stylesBase.botonCuerpo, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                source={require('../Componentes/img/SMS2-32.png')} 
-              />
-              <Text style={styles.botonTexto}>Enviar WhatsApp</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={enviarCorreo}
-            >
-              <Image 
-                style={[styles.botonImg, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                source={require('../Componentes/img/Email-send32.png')} 
-              />
-              <Text style={styles.botonTexto}>Enviar Correo</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={enviarCorreo}
-            >
-              <Image 
-                style={[styles.botonImg, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                source={require('../Componentes/img/Email-send32.png')} 
-              />
-              <Text style={styles.botonTexto}>Enviar Correo</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={visitarSitio}
-            >
-              <Image 
-                style={[styles.botonImg, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                source={require('../Componentes/img/webpage32.png')} 
-              />
-              <Text style={styles.botonTexto}>Visitar Sitio</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={visitarSitio}
-            >
-              <Image 
-                style={[styles.botonImg, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                source={require('../Componentes/img/webpage32.png')} 
-              />
-              <Text style={styles.botonTexto}>Visitar Sitio</Text>
-            </TouchableOpacity>
-
-            {/* Botón "Vincular Ahora" con el contador a la derecha */}
-            {mostrarBotonVincular && (
-              <TouchableOpacity
-                style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-                onPress={vincularAhora}
-              >
-                <Image 
-                  style={[styles.botonImg, { height: 32, resizeMode: 'stretch', width: 32 }]} 
-                  source={require('../Componentes/img/Accept32.png')} 
-                />
-                {/* Se muestra el número de En Solicitud en paréntesis */}
-                <Text style={styles.botonTexto}>Vincular Ahora (Solicitudes enviadas:
-                     {enSolicitudCount})</Text>
+            {/*Buttons*/}
+            {[
+              { label: 'Llamar Ahora', icon: require('../Componentes/img/contact32.png'), onPress: llamarTelefono },
+              { label: 'Enviar WhatsApp', icon: require('../Componentes/img/SMS2-32.png'), onPress: enviarWhatsApp },
+              { label: 'Enviar Correo', icon: require('../Componentes/img/Email-send32.png'), onPress: enviarCorreo },
+              { label: 'Visitar Sitio', icon: require('../Componentes/img/webpage32.png'), onPress: visitarSitio }
+            ].map((btn, idx) => (
+              <TouchableOpacity key={idx} style={[styles.botonCuerpo, stylesBase.botonCuerpo]} onPress={btn.onPress}>
+                <Image source={btn.icon} style={[styles.botonImg, { height:32, width:32 }]} />
+                <Text style={styles.botonTexto}>{btn.label}</Text>
               </TouchableOpacity>
-            )}
+            ))}
 
-            {/* Botón para ver todos los matches de esta institución */}
-            <TouchableOpacity
-              style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10, marginBottom: 10, marginTop: 10 }]}
-              onPress={detalleVinculacion}
-            >
-             
+            <TouchableOpacity style={[styles.botonCuerpo, stylesBase.botonCuerpo]} onPress={vincularAhora}>
+              <Icon name="add-circle-outline" size={24} color="#4CAF50"/>
+              <Text style={styles.botonTexto}>Vincular Ahora (Solicitudes: {enSolicitudCount})</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.botonCuerpo, stylesBase.botonCuerpo]} onPress={detalleVinculacion}>
               <Text style={styles.botonTexto}>Ver Matches</Text>
             </TouchableOpacity>
-
-            {/* 
-              Se eliminó por completo la sección de "Estado de Vinculación".
-              (Ya no se muestra idEstatus en pantalla).
-            */}
           </View>
         </ScrollView>
       )}
 
-      {/* Modal para capturar comentarios (aceptar o rechazar postulado) */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={acceptModalVisible}
-        onRequestClose={() => setAcceptModalVisible(false)}
-      >
+      {/*Accept/Reject Modal*/}
+      <Modal visible={acceptModalVisible} transparent animationType="slide" onRequestClose={handleCancel}>
         <View style={modalStyles.centeredView}>
           <View style={modalStyles.modalView}>
-            <Text style={modalStyles.modalText}>Introduce tus comentarios</Text>
-            <TextInput
-              style={modalStyles.textInput}
-              placeholder="Escribe aquí..."
-              value={inputValue}
-              onChangeText={setInputValue}
-            />
-      {/* Modal para capturar comentarios (aceptar o rechazar postulado) */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={acceptModalVisible}
-        onRequestClose={() => setAcceptModalVisible(false)}
-      >
-        <View style={modalStyles.centeredView}>
-          <View style={modalStyles.modalView}>
-            <Text style={modalStyles.modalText}>Introduce tus comentarios</Text>
-            <TextInput
-              style={modalStyles.textInput}
-              placeholder="Escribe aquí..."
-              value={inputValue}
-              onChangeText={setInputValue}
-            />
-
+            <Text style={modalStyles.modalText}>Comentarios</Text>
+            <TextInput style={modalStyles.textInput} placeholder="Escribe aquí..." value={inputValue} onChangeText={setInputValue}/>
             <View style={modalStyles.buttonContainer}>
-              <TouchableOpacity
-                style={modalStyles.button}
-                onPress={handleAccept}
-              >
-                <Text style={modalStyles.textStyle}>Aceptar</Text>
-              </TouchableOpacity>
-            <View style={modalStyles.buttonContainer}>
-              <TouchableOpacity
-                style={modalStyles.button}
-                onPress={handleAccept}
-              >
-                <Text style={modalStyles.textStyle}>Aceptar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={modalStyles.button}
-                onPress={handleCancel}
-              >
-                <Text style={modalStyles.textStyle}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-              <TouchableOpacity
-                style={modalStyles.button}
-                onPress={handleCancel}
-              >
-                <Text style={modalStyles.textStyle}>Cancelar</Text>
-              </TouchableOpacity>
+              <TouchableOpacity style={modalStyles.button} onPress={handleAccept}><Text style={modalStyles.textStyle}>Aceptar</Text></TouchableOpacity>
+              <TouchableOpacity style={modalStyles.button} onPress={handleCancel}><Text style={modalStyles.textStyle}>Cancelar</Text></TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Modal para mostrar la lista de matches disponibles */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      {/*Matches List Modal*/}
+      <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <View style={modalStyles.centeredView}>
           <View style={modalStyles.modalView}>
             <Text style={modalStyles.modalTitle}>Mis Matches</Text>
-            <FlatList
-              data={postuladoData}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View style={modalStyles.itemContainer}>
-                  <Text style={modalStyles.text}>ID: {item.idEmpresaTalento}</Text>
-                  <Text style={modalStyles.text}>{item.nombre}</Text>
-                  <Text style={modalStyles.text}>Talento: {item.nombreTalento}</Text>
-                  <Text style={modalStyles.text}>Estado: {getStatusDescription(item.idEstatus)}</Text>
-                </View>
-              )}
-            />
-            <TouchableOpacity
-              style={modalStyles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={modalStyles.textStyle}>Cerrar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      {/* Modal para mostrar la lista de matches disponibles */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={modalStyles.centeredView}>
-          <View style={modalStyles.modalView}>
-            <Text style={modalStyles.modalTitle}>Mis Matches</Text>
-            <FlatList
-              data={postuladoData}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View style={modalStyles.itemContainer}>
-                  <Text style={modalStyles.text}>ID: {item.idEmpresaTalento}</Text>
-                  <Text style={modalStyles.text}>{item.nombre}</Text>
-                  <Text style={modalStyles.text}>Talento: {item.nombreTalento}</Text>
-                  <Text style={modalStyles.text}>Estado: {getStatusDescription(item.idEstatus)}</Text>
-                </View>
-              )}
-            />
-            <TouchableOpacity
-              style={modalStyles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={modalStyles.textStyle}>Cerrar</Text>
-            </TouchableOpacity>
+            <FlatList data={postuladoData} keyExtractor={(item,i)=>i.toString()} renderItem={renderMatchItem}/>
+            <TouchableOpacity style={modalStyles.closeButton} onPress={() => setModalVisible(false)}><Text style={modalStyles.textStyle}>Cerrar</Text></TouchableOpacity>
           </View>
         </View>
       </Modal>
 
+      {/* FOOTER*/}
       <View style={[styles.seccionPie, stylesBase.seccionPie]}>
-        <TouchableOpacity
-          style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10 }]}
-          onPress={() => {
-            navigation.navigate('InstitucionesSeleccion', {
-              usuario: usuario,
-              idUsuario: idUsuario,
-              idEmpresa: idEmpresa,
-              talento: talento,
-              empresaData: empresaData,
-            });
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon name="caret-back-circle-outline" size={30} color={stylesBase.icon} />
-            <Text style={[styles.botonTexto, stylesBase.botonTexto]}> Regresar</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  );
-};
-      <View style={[styles.seccionPie, stylesBase.seccionPie]}>
-        <TouchableOpacity
-          style={[styles.botonCuerpo, stylesBase.botonCuerpo, { paddingLeft: 10, paddingRight: 10 }]}
-          onPress={() => {
-            navigation.navigate('InstitucionesSeleccion', {
-              usuario: usuario,
-              idUsuario: idUsuario,
-              idEmpresa: idEmpresa,
-              talento: talento,
-              empresaData: empresaData,
-            });
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon name="caret-back-circle-outline" size={30} color={stylesBase.icon} />
-            <Text style={[styles.botonTexto, stylesBase.botonTexto]}> Regresar</Text>
-          </View>
+        <TouchableOpacity style={[styles.botonCuerpo, stylesBase.botonCuerpo]} onPress={() => navigation.goBack()}>
+          <Icon name="caret-back-circle-outline" size={30} color={stylesBase.icon} />
+          <Text style={[styles.botonTexto, stylesBase.botonTexto]}>Regresar</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -803,109 +288,17 @@ const InstitucionesDescripcion = ({ navigation, route }) => {
 };
 
 const modalStyles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalView: {
-    width: '90%', 
-    height: '80%',
-    margin: 10,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    marginBottom: 15,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  modalTitle: {
-    marginBottom: 15,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  textInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    width: '100%',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 20,
-  },
-  textInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    width: '100%',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
-  },
-  button: {
-    backgroundColor: '#2196F3',
-    borderRadius: 10,
-    padding: 10,
-    margin: 10,
-  },
-  textStyle: {
-    color: 'white',
-    textAlign: 'center',
-  },
-  closeButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 20,
-  },
-  itemContainer: {
-    marginVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingBottom: 8,
-  },
-  text: {
-    fontSize: 14,
-    marginVertical: 2,
-  },
-  closeButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 20,
-  },
-  itemContainer: {
-    marginVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingBottom: 8,
-  },
-  text: {
-    fontSize: 14,
-    marginVertical: 2,
-  },
+  centeredView: { flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.5)' },
+  modalView: { width:'90%', backgroundColor:'white', borderRadius:10, padding:20, alignItems:'center' },
+  modalTitle:{ fontSize:18, fontWeight:'bold', marginBottom:10 },
+  modalText:{ marginBottom:10, textAlign:'center' },
+  textInput:{ width:'100%', borderColor:'#ccc', borderWidth:1, borderRadius:5, padding:10, marginBottom:15 },
+  buttonContainer:{ flexDirection:'row', justifyContent:'space-around', width:'100%' },
+  button:{ backgroundColor:'#2196F3', borderRadius:5, padding:10, flex:1, margin:5 },
+  textStyle:{ color:'white', textAlign:'center' },
+  closeButton:{ marginTop:15, backgroundColor:'#2196F3', borderRadius:5, padding:10 },
+  itemContainer:{ marginVertical:5, padding:10, borderBottomWidth:1, borderColor:'#ccc' },
+  text:{ fontSize:14 }
 });
 
 export default InstitucionesDescripcion;
